@@ -31,18 +31,20 @@ fn main() {
         outputs.data
     ); */ */
 
-    ecdsa();
-    println!(" tesst");
-}
-
-fn ecdsa() {
     // Generate a random secp256k1 keypair and sign the message.
     let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
     let message = b"This is a message that will be signed, and verified within the zkVM";
     let signature: Signature = signing_key.sign(message);
-    
-    
-    let input = (signing_key.verifying_key().to_encoded_point(true), message, &signature);
+    ecdsa_verification(signing_key.verifying_key(), message, &signature);
+    println!("test pass");
+}
+
+fn ecdsa_verification(
+    verifying_key: &VerifyingKey,
+    message: &[u8],
+    signature: &Signature,
+) {
+    let input = (verifying_key.to_encoded_point(true), message, signature);
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
@@ -56,7 +58,7 @@ fn ecdsa() {
     prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
 }
 
-fn search_json(data: &str) { //  -> Outputs
+/* fn search_json(data: &str) { //  -> Outputs
     let env = ExecutorEnv::builder()
         .write(&data)
         .unwrap()
@@ -74,7 +76,7 @@ fn search_json(data: &str) { //  -> Outputs
     let receipt = prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
 
     // receipt.journal.decode().unwrap()
-}
+} */
 
 #[cfg(test)]
 mod tests {
