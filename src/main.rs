@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use json_core::Outputs;
-use json_methods::SEARCH_JSON_ELF;
+use methods::SEARCH_JSON_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {

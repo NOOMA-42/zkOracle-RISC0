@@ -1,14 +1,21 @@
-[workspace]
-members = ["methods", "core", "relay"]
-resolver = "2"
+[package]
+name = "json-example"
+version = "0.1.0"
+edition = "2021"
 
-[workspace.dependencies]
+[dependencies]
 risc0-build = { version = "0.19.1" }
 risc0-zkvm = { version = "0.19.1", default-features = false }
 bonsai-sdk = { version = "0.5.1" }
 bonsai-ethereum-relay = { version = "0.5.1" }
-methods = { path = "./methods", package = "bonsai-starter-methods" }
-core = { path = "./core", package = "json-core" }
+methods = { path = "methods" }
+json-core = { path = "core" }
+
+[features]
+default = []
+cuda = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/prove"]
+profiler = ["risc0-zkvm/profiler"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

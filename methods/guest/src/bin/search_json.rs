@@ -14,7 +14,7 @@
 
 #![no_main]
 
-use std::io::Read;
+// use std::io::Read;
 
 use json::parse;
 use json_core::Outputs;
@@ -23,25 +23,25 @@ use risc0_zkvm::{
     sha::{Impl, Sha256},
 };
 use rsa::{Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey};
-use ethabi::{ethereum_types::U256, ParamType, Token};
+// use ethabi::{ethereum_types::U256, ParamType, Token};
 
 risc0_zkvm::guest::entry!(main);
 
-fn fibonacci(n: U256) -> U256 {
+/* fn fibonacci(n: U256) -> U256 {
     let (mut prev, mut curr) = (U256::one(), U256::one());
     for _ in 2..=n.as_u32() {
         (prev, curr) = (curr, prev + curr);
     }
     curr
-}
+} */
 
 fn main() {
-    // Read data sent from the application contract.
+    /* // Read data sent from the application contract.
     let mut input_bytes = Vec::<u8>::new();
     env::stdin().read_to_end(&mut input_bytes).unwrap();
     // Type array passed to `ethabi::decode_whole` should match the types encoded in
     // the application contract.
-    let input = ethabi::decode_whole(&[ParamType::Uint(256)], &input_bytes).unwrap();
+    let input: Vec<Token> = ethabi::decode_whole(&[ParamType::Uint(256)], &input_bytes).unwrap();
     let n: U256 = input[0].clone().into_uint().unwrap();
 
     // Run the computation.
@@ -49,7 +49,7 @@ fn main() {
     // binance_quote();
     // Commit the journal that will be received by the application contract.
     // Encoded types should match the args expected by the application callback.
-    env::commit_slice(&ethabi::encode(&[Token::Uint(n), Token::Uint(result)]));
+    env::commit_slice(&ethabi::encode(&[Token::Uint(n), Token::Uint(result)])); */
 
     let data: String = env::read();
     let sha = *Impl::hash_bytes(&data.as_bytes());

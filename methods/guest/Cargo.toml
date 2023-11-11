@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "fibonacci"
-path = "src/bin/fibonacci.rs"
+name = "search_json"
+path = "src/bin/search_json.rs"
 
 [dependencies]
 json = "0.12"
@@ -16,8 +16,6 @@ radium = "=0.7.1"
 risc0-zkvm = { version = "0.19.1", default-features = false, features = ["std"] }
 rsa = "0.9.3"
 rand = "0.8.5"
-
-
 
 [patch.crates-io]
 radium = { git = "https://github.com/bitvecto-rs/radium", rev = "723bed5abd75994ee4b7221b8b12c9f4e77ce408" }
