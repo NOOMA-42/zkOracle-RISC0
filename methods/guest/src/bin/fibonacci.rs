@@ -22,7 +22,7 @@ use risc0_zkvm::{
     guest::env,
     sha::{Impl, Sha256},
 };
-
+use rsa::{Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey};
 use ethabi::{ethereum_types::U256, ParamType, Token};
 
 risc0_zkvm::guest::entry!(main);
@@ -60,4 +60,16 @@ fn main() {
         hash: sha,
     };
     env::commit(&out);
+
+
+    let mut rng = rand::thread_rng();
+    let bits = 2048;
+    let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+    let pub_key = RsaPublicKey::from(&priv_key);
+
+    let data = b"hello world";
+    let enc_data = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, &data[..]).expect("failed to encrypt");
+
+    let dec_data = priv_key.decrypt(Pkcs1v15Encrypt, &enc_data).expect("failed to decrypt");
+
 }

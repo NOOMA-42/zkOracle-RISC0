@@ -14,6 +14,8 @@ ethabi = { version = "18.0", default-features = false }
 # Directly import radium to silence warning about unused patch. See https://github.com/risc0/risc0/issues/549
 radium = "=0.7.1"
 risc0-zkvm = { version = "0.19.1", default-features = false, features = ["std"] }
+rsa = "0.9.3"
+rand = "0.8.5"
 
 
 
