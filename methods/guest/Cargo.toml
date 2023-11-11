@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "search_json"
-path = "src/bin/search_json.rs"
+name = "verifiable_compute_engine"
+path = "src/bin/verifiable_compute_engine.rs"
 
 [dependencies]
 json = "0.12"
@@ -16,7 +16,6 @@ radium = "=0.7.1"
 risc0-zkvm = { version = "0.19.1", default-features = false, features = ["std"] }
 hex-literal = "0.4"
 k256 = { version = "=0.13.1", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default_features = false }
-
 
 [patch.crates-io]
 radium = { git = "https://github.com/bitvecto-rs/radium", rev = "723bed5abd75994ee4b7221b8b12c9f4e77ce408" }

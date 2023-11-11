@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use json_core::Outputs;
-use methods::SEARCH_JSON_ELF;
+use methods::VERIFIABLE_COMPUTE_ENGINE_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use k256::{
     ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey},
@@ -22,29 +22,24 @@ use k256::{
 use rand_core::OsRng;
 
 fn main() {
-    /* let data = include_str!("../res/example.json");
-    let outputs = search_json(data);
-    /* println!();
-    println!("  {:?}", outputs.hash);
-    println!(
-        "provably contains a field 'critical_data' with value {}",
-        outputs.data
-    ); */ */
-
+    // FIXME: remove
     // Generate a random secp256k1 keypair and sign the message.
     let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
-    let message = b"This is a message that will be signed, and verified within the zkVM";
-    let signature: Signature = signing_key.sign(message);
-    ecdsa_verification(signing_key.verifying_key(), message, &signature);
+    let val: u32 = 47;
+    let signature: Signature = signing_key.sign(&val.to_be_bytes()); 
+
+    let payload = include_str!("../res/example.json");
+    verifiable_compute_engine(payload, signing_key.verifying_key(), &signature);
     println!("test pass");
 }
 
-fn ecdsa_verification(
+// Execute guest functions and proving
+fn verifiable_compute_engine(
+    payload: &str,
     verifying_key: &VerifyingKey,
-    message: &[u8],
     signature: &Signature,
 ) {
-    let input = (verifying_key.to_encoded_point(true), message, signature);
+    let input = (payload, verifying_key.to_encoded_point(true), signature);
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
@@ -55,28 +50,9 @@ fn ecdsa_verification(
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
+    let receipt = prover.prove_elf(env, VERIFIABLE_COMPUTE_ENGINE_ELF).unwrap();
+    receipt.journal.decode().unwrap()
 }
-
-/* fn search_json(data: &str) { //  -> Outputs
-    let env = ExecutorEnv::builder()
-        .write(&data)
-        .unwrap()
-        .build()
-        .unwrap();
-
-        /* 
-        .write(&data)
-        .unwrap()
-         */
-    // Obtain the default prover.
-    let prover = default_prover();
-
-    // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
-
-    // receipt.journal.decode().unwrap()
-} */
 
 #[cfg(test)]
 mod tests {
