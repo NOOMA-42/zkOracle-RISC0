@@ -10,12 +10,17 @@ bonsai-sdk = { version = "0.5.1" }
 bonsai-ethereum-relay = { version = "0.5.1" }
 methods = { path = "methods" }
 json-core = { path = "core" }
+k256 = { version = "0.13", features = ["serde"] }
+rand_core = "0.6.4"
+serde = "1.0"
+anyhow = "1.0"
+clap = "4.4"
 
 [features]
 default = []
 cuda = ["risc0-zkvm/cuda"]
 prove = ["risc0-zkvm/prove"]
-profiler = ["risc0-zkvm/profiler"]
+
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

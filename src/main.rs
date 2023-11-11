@@ -15,21 +15,36 @@
 use json_core::Outputs;
 use methods::SEARCH_JSON_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use k256::{
+    ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey},
+    EncodedPoint,
+};
+use rand_core::OsRng;
 
 fn main() {
-    let data = include_str!("../res/example.json");
+    /* let data = include_str!("../res/example.json");
     let outputs = search_json(data);
-    println!();
+    /* println!();
     println!("  {:?}", outputs.hash);
     println!(
         "provably contains a field 'critical_data' with value {}",
         outputs.data
-    );
+    ); */ */
+
+    ecdsa();
+    println!(" tesst");
 }
 
-fn search_json(data: &str) -> Outputs {
+fn ecdsa() {
+    // Generate a random secp256k1 keypair and sign the message.
+    let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
+    let message = b"This is a message that will be signed, and verified within the zkVM";
+    let signature: Signature = signing_key.sign(message);
+    
+    
+    let input = (signing_key.verifying_key().to_encoded_point(true), message, &signature);
     let env = ExecutorEnv::builder()
-        .write(&data)
+        .write(&input)
         .unwrap()
         .build()
         .unwrap();
@@ -38,9 +53,27 @@ fn search_json(data: &str) -> Outputs {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
+    prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
+}
+
+fn search_json(data: &str) { //  -> Outputs
+    let env = ExecutorEnv::builder()
+        .write(&data)
+        .unwrap()
+        .build()
+        .unwrap();
+
+        /* 
+        .write(&data)
+        .unwrap()
+         */
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
 
-    receipt.journal.decode().unwrap()
+    // receipt.journal.decode().unwrap()
 }
 
 #[cfg(test)]

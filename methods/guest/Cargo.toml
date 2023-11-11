@@ -14,11 +14,15 @@ ethabi = { version = "18.0", default-features = false }
 # Directly import radium to silence warning about unused patch. See https://github.com/risc0/risc0/issues/549
 radium = "=0.7.1"
 risc0-zkvm = { version = "0.19.1", default-features = false, features = ["std"] }
-rsa = "0.9.3"
-rand = "0.8.5"
+hex-literal = "0.4"
+k256 = { version = "=0.13.1", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default_features = false }
+
 
 [patch.crates-io]
 radium = { git = "https://github.com/bitvecto-rs/radium", rev = "723bed5abd75994ee4b7221b8b12c9f4e77ce408" }
+k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.1-risczero.1"  }
+crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.2-risczero.0" }
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }
 
 [profile.release]
 lto = true

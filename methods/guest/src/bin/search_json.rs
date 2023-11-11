@@ -17,14 +17,18 @@
 // use std::io::Read;
 
 use json::parse;
-use json_core::Outputs;
-use risc0_zkvm::{
+// use json_core::Outputs;
+/* use risc0_zkvm::{
     guest::env,
     sha::{Impl, Sha256},
-};
-use rsa::{Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey};
+}; */
+use risc0_zkvm::guest::env;
+// use rsa::{Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey};
 // use ethabi::{ethereum_types::U256, ParamType, Token};
-
+use k256::{
+    ecdsa::{signature::Verifier, Signature, VerifyingKey},
+    EncodedPoint,
+};
 risc0_zkvm::guest::entry!(main);
 
 /* fn fibonacci(n: U256) -> U256 {
@@ -51,25 +55,56 @@ fn main() {
     // Encoded types should match the args expected by the application callback.
     env::commit_slice(&ethabi::encode(&[Token::Uint(n), Token::Uint(result)])); */
 
+
+    // Parse the price feed JSON data
     let data: String = env::read();
-    let sha = *Impl::hash_bytes(&data.as_bytes());
+    
+    // let sha = *Impl::hash_bytes(&data.as_bytes());
     let data = parse(&data).unwrap();
-    let proven_val = data["critical_data"].as_u32().unwrap();
-    let out = Outputs {
-        data: proven_val,
-        hash: sha,
-    };
-    env::commit(&out);
+    let price_val = data["critical_data"].as_u32().unwrap();
+    //let timestamp_val = data["timestamp"].as_u32().unwrap();
+
+    // Parst the price feed JSON data
+    // 
+    /* let data: String = env::read(); // FIXME
+    let data = parse(&data).unwrap();
+    let price_val = data[""].as_u32().unwrap();
+    let timestamp_val = data["timestamp"].as_u32().unwrap(); */
+    
+    // verify the signature along with the price feed
+    // verify price feed from binance
+    
+    // Decode the verifying key, message, and signature from the inputs.
+    let (encoded_verifying_key, message, signature): (EncodedPoint, Vec<u8>, Signature) =
+    env::read();
+    let verifying_key = VerifyingKey::from_encoded_point(&encoded_verifying_key).unwrap();
+
+    // Verify the signature, panicking if verification fails.
+    verifying_key
+        .verify(&message, &signature)
+        .expect("ECDSA signature verification failed");
+
+    // Commit to the journal the verifying key and message that was signed.
+    env::commit(&(encoded_verifying_key, message));
 
 
-    let mut rng = rand::thread_rng();
+    /* let mut rng = rand::thread_rng();
     let bits = 2048;
     let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
     let pub_key = RsaPublicKey::from(&priv_key);
-
+    
     let data = b"hello world";
     let enc_data = pub_key.encrypt(&mut rng, Pkcs1v15Encrypt, &data[..]).expect("failed to encrypt");
-
+    
     let dec_data = priv_key.decrypt(Pkcs1v15Encrypt, &enc_data).expect("failed to decrypt");
+    
+    // verify the signature along with the price feed
+    // verify price feed from Uniswap
+    let out = Outputs {
+        data: price_val,
+        hash: 12,
+    };
+    env::commit(&out); */
+
 
 }
