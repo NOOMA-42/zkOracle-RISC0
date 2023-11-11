@@ -37,6 +37,8 @@ name = "bonsai-starter-methods-guest"
 version = "0.1.0"
 dependencies = [
  "ethabi",
+ "json",
+ "json-core",
  "radium",
  "risc0-zkvm",
 ]
@@ -187,6 +189,20 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "json"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
+
+[[package]]
+name = "json-core"
+version = "0.1.0"
+dependencies = [
+ "risc0-zkvm",
+ "serde",
+]
 
 [[package]]
 name = "keccak"

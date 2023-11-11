@@ -1,5 +1,5 @@
 [workspace]
-members = ["methods", "relay"]
+members = ["methods", "core", "relay"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -8,6 +8,7 @@ risc0-zkvm = { version = "0.19.1", default-features = false }
 bonsai-sdk = { version = "0.5.1" }
 bonsai-ethereum-relay = { version = "0.5.1" }
 methods = { path = "./methods", package = "bonsai-starter-methods" }
+core = { path = "./core", package = "json-core" }
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

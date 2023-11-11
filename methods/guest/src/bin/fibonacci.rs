@@ -16,8 +16,14 @@
 
 use std::io::Read;
 
+use json::parse;
+use json_core::Outputs;
+use risc0_zkvm::{
+    guest::env,
+    sha::{Impl, Sha256},
+};
+
 use ethabi::{ethereum_types::U256, ParamType, Token};
-use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
@@ -40,8 +46,18 @@ fn main() {
 
     // Run the computation.
     let result = fibonacci(n);
-
+    // binance_quote();
     // Commit the journal that will be received by the application contract.
     // Encoded types should match the args expected by the application callback.
     env::commit_slice(&ethabi::encode(&[Token::Uint(n), Token::Uint(result)]));
+
+    let data: String = env::read();
+    let sha = *Impl::hash_bytes(&data.as_bytes());
+    let data = parse(&data).unwrap();
+    let proven_val = data["critical_data"].as_u32().unwrap();
+    let out = Outputs {
+        data: proven_val,
+        hash: sha,
+    };
+    env::commit(&out);
 }
