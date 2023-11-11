@@ -10,31 +10,23 @@ const port = 3000;
 const key = new rsa(fs.readFileSync("./key", "utf8"));
 
 app.get("/", (req, res) => {
-  if (!req.query.url) return res.status(400).send({ error: "No url provided" });
-  fetch(req.query.url)
-    .then(async (r) => {
-      if (
-        r.headers.get("content-type") &&
-        contentType.parse(r.headers.get("content-type")).type ===
-          "application/json"
-      ) {
-        return await r.json();
-      }
-      return {
-        data: await r.text(),
-      };
-    })
+  if (!req.query.source)
+    return res.status(400).send({ error: "No source provided" });
+  fetch(
+    "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=ETH&tsyms=USD"
+  )
+    .then(async (r) => await r.json())
     .then((data) => {
-      return {
-        ...data,
-        ["proxy.url"]: req.query.url,
-      };
-    })
-    .then((data) => {
-      const sig = key.sign(JSON.stringify(data), "hex", "utf8");
+      const price = +(
+        data.RAW.ETH.USD.PRICE *
+        (1 + 0.01 * (0.5 - Math.random()))
+      ).toFixed(2);
+      const time = data.RAW.ETH.USD.LASTUPDATE;
+      const sig = key.sign(JSON.stringify({ price, time }), "hex", "utf8");
       res.send({
-        ...data,
-        ["proxy.signature"]: sig,
+        price,
+        time,
+        sig,
       });
     })
     .catch((err) => {
