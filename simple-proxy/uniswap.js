@@ -3,6 +3,7 @@ const { Route, Pair } = require("@uniswap/v2-sdk");
 const { getContract, createPublicClient, http } = require("viem");
 const { mainnet } = require("viem/chains");
 
+
 const client = createPublicClient({
   chain: mainnet,
   transport: http(
@@ -58,11 +59,12 @@ module.exports = async (req, res, key) => {
   const route = new Route([pair], WETH9[USDT.chainId], USDT);
 
   const price = parseFloat(route.midPrice.toFixed(2));
-  const time = new Date().getTime();
-  const sig = key.sign(JSON.stringify({ price, time }), "hex", "utf8");
-  res.send({
-    price,
-    time,
-    sig,
-  });
-};
+  // const time = new Date().getTime();
+  
+  // ECDSA signing
+  //  const message = String(price);
+   const signature = key.sign(price).toDER('hex');
+  
+   res.send({ price, sig: signature })
+ };
+

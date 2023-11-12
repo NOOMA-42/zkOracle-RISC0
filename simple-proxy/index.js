@@ -1,17 +1,19 @@
 const express = require("express");
 const fs = require("fs");
-const rsa = require("node-rsa");
+const EC = require("elliptic").ec;
 const fetch = require("node-fetch");
 
 const dataSource = {
   uniswap: require("./uniswap"),
-  binance: require("./binance"),
+  btcturk: require("./btcturk"),
+  // binance: require("./binance"),
 };
 
 const app = express();
 const port = 3000;
 
-const key = new rsa(fs.readFileSync("./key", "utf8"));
+const ec = new EC('secp256k1');
+const key = ec.genKeyPair();
 
 app.get("/", (req, res) => {
   if (!req.query.source)
@@ -22,7 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Using RSA key:`);
-  console.log(key.exportKey("pkcs1-public"));
+  console.log(`Using ECDSA key:`);
+  console.log(key.getPublic().encode('hex'));
   console.log(`Server listening on port ${port}`);
 });
