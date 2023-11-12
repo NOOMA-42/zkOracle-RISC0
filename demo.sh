@@ -1,6 +1,8 @@
 #!/bin/bash
 
-fuser 3000/tcp
+
+# Check if port is already in use
+# kill $(lsof -t -i:$PORT)
 
 # Check if at least one argument was provided
 if [ $# -lt 2 ]; then

@@ -40,9 +40,6 @@ fn main() {
     let n: U256 = input[0].clone().into_uint().unwrap();
 
     // Run the computation.
-    let result = fibonacci(n);
-    // binance_quote();
-    // Commit the journal that will be received by the application contract.
     // Encoded types should match the args expected by the application callback.
     env::commit_slice(&ethabi::encode(&[Token::Uint(n), Token::Uint(result)])); */
 
@@ -50,31 +47,31 @@ fn main() {
     // Parsing Data 
     //
     // Parse the price feed JSON data, and decode the verifying key, message, and signature from the inputs.
-    let (payload, encoded_verifying_key, signature): (String, EncodedPoint, Signature) =
-    env::read();
-    let verifying_key = VerifyingKey::from_encoded_point(&encoded_verifying_key).unwrap();
+    let payloads: Vec<(String, EncodedPoint)> = env::read();
+    let mut prices = Vec::<f64>::new();
+    payloads.iter().for_each(|(
+        response,  
+        verifyingkey
+    )| {
+        let verifying_key = VerifyingKey::from_encoded_point(&verifyingkey).unwrap();
 
-    // let sha = *Impl::hash_bytes(&data.as_bytes());
-    let data = parse(&payload).unwrap();
-    let price_val = data["critical_data"].as_u32().unwrap();
-    let price_val_le_byte = price_val.to_be_bytes();
-
-    // Parse the price feed JSON data // FIXME: parse secone source of data
-    // 
-    /* let data: String = env::read(); 
-    let data = parse(&data).unwrap();
-    let price_val = data[""].as_u32().unwrap();
-    let timestamp_val = data["timestamp"].as_u32().unwrap(); */
-    
-    // verification 
-    //
-    // verify signature with price feed from binance, panicking if verification fails.
-    verifying_key
-        .verify(&price_val_le_byte, &signature)
-        .expect("ECDSA signature verification failed");
+        let data = parse(&response).unwrap();
+        let price_literal = data["price"].as_str().unwrap().as_bytes();
+        let price = data["price"].as_f64().unwrap(); // FIXME: check signing method
+        let signature_byte = data["sig"].as_u32().unwrap().to_le_bytes();
+        let signature = Signature::from_slice(&signature_byte).unwrap();
+        
+        // verification 
+        //
+        // verify signature with price feed from binance, panicking if verification fails.
+        verifying_key
+            .verify(&price_literal, &signature)
+            .expect("ECDSA signature verification failed");
+        prices.push(price);
+    });
 
     // Commit to the journal the verifying key and message that was signed.
-    env::commit(&(encoded_verifying_key, &price_val_le_byte));
+    // env::commit(&(encoded_verifying_key, &price_val_le_byte));
 
     // verify the signature along with the price feed
     // verify price feed from Uniswap

@@ -23,6 +23,13 @@ use rand_core::OsRng;
 use tokio::runtime::Runtime;
 use reqwest::{Client, Error, Response};
 
+/*  
+(reponse body: String, verifying key: EncodedPoint)
+where response body is {"price":, "time":, "sig":}
+Host directly send the api response to the guest in preventing potential manipulation
+*/
+type Payload = (String, EncodedPoint);
+
 fn main() {
     println!("💥 Call Price Oracle Twice");
     price_oracle();
@@ -31,6 +38,14 @@ fn main() {
 }
 
 fn price_oracle() {
+    // Get signing keys
+    //
+    // TODO Consider proxy expose the signing keys route
+    let mut signing_keys = Vec::new();
+    signing_keys.push(("binance".to_string(), SigningKey::random(&mut OsRng))); // FIXEME 
+    signing_keys.push(("uniswap".to_string(), SigningKey::random(&mut OsRng)));
+    
+    
     // Request proxy data server
     // 
     // Quote binance and uniswap price
@@ -39,14 +54,27 @@ fn price_oracle() {
     let mut query_params = Vec::new();
     query_params.push([("source".to_string(), "binance".to_string())]);
     query_params.push([("source".to_string(), "uniswap".to_string())]);
-    let mut test_payloads = Vec::new();
+    let mut payloads: Vec<Payload> = Vec::new();
 
+    // Send request to corresponding data provider and fill payload
     for params in &query_params {
+        let provider_signing_key = &signing_keys
+            .iter()
+            .find(|(provider, _)| provider == &params[0].1)
+            .expect("Provider not found")
+            .1;
+        let mut payload: Payload = (
+            "".to_string(), // Fill in response body later
+            provider_signing_key.verifying_key().to_encoded_point(true),
+        );
+
+        // Request price feed
         match rt.block_on(get_request(url, params)) {
             Ok(response) => {
                 let body = rt.block_on(response.text()).expect("Failed to read response");
                 println!("Response: {}", body);
-                test_payloads.push(serde_json::to_string(&body).unwrap());
+                payload.0 = serde_json::to_string(&body).unwrap();
+                payloads.push(payload);
             },
             Err(e) => eprintln!("Request failed: {}: {}", e, params[0].1),
         }
@@ -55,14 +83,13 @@ fn price_oracle() {
 
     // FIXME: remove
     // Generate a random secp256k1 keypair and sign the message.
-    let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
+    /* let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
     let val: u32 = 47;
-    let signature: Signature = signing_key.sign(&val.to_be_bytes()); 
+    let signature: Signature = signing_key.sign(&val.to_be_bytes());  */
 
     // Execute and Proving
     //
-    let payload = include_str!("../res/example.json");
-    verifiable_compute_engine(payload, signing_key.verifying_key(), &signature);
+    verifiable_compute_engine(payloads);
     println!("✨ Price Oracle Execution Success");
 }
 
@@ -78,14 +105,11 @@ async fn get_request(url: &str, query: &[(String, String)]) -> Result<Response, 
 
 // Execute guest functions and proving
 fn verifiable_compute_engine(
-    payload: &str,
-    verifying_key: &VerifyingKey,
-    signature: &Signature,
+    payload: Vec<Payload>,
 ) {
     println!("...Start Verifiable Compute Engine");
-    let input = (payload, verifying_key.to_encoded_point(true), signature);
     let env = ExecutorEnv::builder()
-        .write(&input)
+        .write(&payload)
         .unwrap()
         .build()
         .unwrap();

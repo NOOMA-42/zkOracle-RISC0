@@ -137,3 +137,8 @@ remove profiler
 dev mode or Bonsai get you faster
 rsa requires huge memory, cpu
 use accelerated crate if applicable
+
+1. Can malicious oracle fake the signature? 
+No, because the signature and data are in the committed journal to contract and the data provider public key is available. Watcher can verify the signature.
+
+2. 
