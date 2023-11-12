@@ -46,10 +46,10 @@ fn main() {
     // Encoded types should match the args expected by the application callback.
     env::commit_slice(&ethabi::encode(&[Token::Uint(n), Token::Uint(result)])); */
 
-    /* 
-    Parsing Data 
+     
+    // Parsing Data 
+    //
     // Parse the price feed JSON data, and decode the verifying key, message, and signature from the inputs.
-    */
     let (payload, encoded_verifying_key, signature): (String, EncodedPoint, Signature) =
     env::read();
     let verifying_key = VerifyingKey::from_encoded_point(&encoded_verifying_key).unwrap();
@@ -66,10 +66,9 @@ fn main() {
     let price_val = data[""].as_u32().unwrap();
     let timestamp_val = data["timestamp"].as_u32().unwrap(); */
     
-    /* 
     // verification 
+    //
     // verify signature with price feed from binance, panicking if verification fails.
-    */
     verifying_key
         .verify(&price_val_le_byte, &signature)
         .expect("ECDSA signature verification failed");
