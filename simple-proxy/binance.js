@@ -6,12 +6,12 @@ module.exports = (req, res, key) =>
     .then((data) => {
       const price = parseFloat(parseFloat(data["price"]).toFixed(2));
       const time = new Date().getTime();
-      const sig = key.sign(JSON.stringify({ price, time }), "hex", "utf8");
-      res.send({
-        price,
-        time,
-        sig,
-      });
+      
+      // ECDSA signing
+      const message = JSON.stringify({ price, time });
+      const signature = key.sign(message).toDER('hex');
+      
+      res.send({ price, time, sig: signature });
     })
     .catch((err) => {
       console.error(err);
