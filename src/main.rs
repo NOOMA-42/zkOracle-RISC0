@@ -42,7 +42,7 @@ fn price_oracle() {
     //
     // TODO Consider proxy expose the signing keys route
     let mut signing_keys = Vec::new();
-    signing_keys.push(("binance".to_string(), SigningKey::random(&mut OsRng))); // FIXEME 
+    signing_keys.push(("btcturk".to_string(), SigningKey::random(&mut OsRng))); // FIXEME 
     signing_keys.push(("uniswap".to_string(), SigningKey::random(&mut OsRng)));
     
     
@@ -52,7 +52,7 @@ fn price_oracle() {
     let rt = Runtime::new().expect("Failed to create runtime");
     let url = "http://localhost:3000";
     let mut query_params = Vec::new();
-    query_params.push([("source".to_string(), "binance".to_string())]);
+    query_params.push([("source".to_string(), "btcturk".to_string())]);
     query_params.push([("source".to_string(), "uniswap".to_string())]);
     let mut payloads: Vec<Payload> = Vec::new();
 
@@ -75,17 +75,11 @@ fn price_oracle() {
                 println!("Response: {}", body);
                 payload.0 = serde_json::to_string(&body).unwrap();
                 payloads.push(payload);
+                println!("✨✨ Request Price Feed Success {}", params[0].1);
             },
             Err(e) => eprintln!("Request failed: {}: {}", e, params[0].1),
         }
-        println!("✨✨ Request Price Feed Success {}", params[0].1);
     }
-
-    // FIXME: remove
-    // Generate a random secp256k1 keypair and sign the message.
-    /* let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
-    let val: u32 = 47;
-    let signature: Signature = signing_key.sign(&val.to_be_bytes());  */
 
     // Execute and Proving
     //
@@ -105,11 +99,11 @@ async fn get_request(url: &str, query: &[(String, String)]) -> Result<Response, 
 
 // Execute guest functions and proving
 fn verifiable_compute_engine(
-    payload: Vec<Payload>,
+    payloads: Vec<Payload>,
 ) {
     println!("...Start Verifiable Compute Engine");
     let env = ExecutorEnv::builder()
-        .write(&payload)
+        .write(&payloads)
         .unwrap()
         .build()
         .unwrap();
@@ -118,9 +112,10 @@ fn verifiable_compute_engine(
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, VERIFIABLE_COMPUTE_ENGINE_ELF).unwrap();
+    // let receipt = 
+    prover.prove_elf(env, VERIFIABLE_COMPUTE_ENGINE_ELF);
     println!("✨ Proving Success");
-    receipt.journal.decode().unwrap()
+    // receipt.journal.decode().unwrap()
 }
 
 #[cfg(test)]

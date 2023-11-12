@@ -6,7 +6,7 @@
 
 # Check if at least one argument was provided
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <bonsai> <devmode>..."
+    echo "Usage: $0 <bonsai> <devmode> [debug]..."
     echo "Argument should be either T or F"
     exit 1
 fi
@@ -33,13 +33,19 @@ else
     exit
 fi
 
+# Execute oracle
+#cd ..
+if [ "$3" = "T" ]; then
+    RUST_BACKTRACE=1 cargo run
+else
+    cargo run
+fi
+
 # Setup
-cd simple-proxy
-yarn 
+#cd simple-proxy
+#yarn 
 
 # Init simple-proxy server
-yarn start &
+#yarn start &
 
-# Execute oracle
-cd ..
-cargo run
+exit 0

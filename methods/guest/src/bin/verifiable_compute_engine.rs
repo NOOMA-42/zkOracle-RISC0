@@ -53,8 +53,8 @@ fn main() {
         response,  
         verifyingkey
     )| {
+        env::log("looping providers...");
         let verifying_key = VerifyingKey::from_encoded_point(&verifyingkey).unwrap();
-
         let data = parse(&response).unwrap();
         let price_literal = data["price"].as_str().unwrap().as_bytes();
         let price = data["price"].as_f64().unwrap(); // FIXME: check signing method
@@ -69,9 +69,12 @@ fn main() {
             .expect("ECDSA signature verification failed");
         prices.push(price);
     });
-
+    let sum: f64 = prices.iter().sum();
+    let count = prices.len() as f64;
+    let price_average = sum / count;
+    
     // Commit to the journal the verifying key and message that was signed.
-    // env::commit(&(encoded_verifying_key, &price_val_le_byte));
+    env::commit(&price_average);
 
     // verify the signature along with the price feed
     // verify price feed from Uniswap
