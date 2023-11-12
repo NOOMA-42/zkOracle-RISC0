@@ -18,7 +18,7 @@ pragma solidity ^0.8.17;
 
 import {BonsaiTest} from "bonsai/BonsaiTest.sol";
 import {IBonsaiRelay} from "bonsai/IBonsaiRelay.sol";
-import {BonsaiStarter} from "contracts/BonsaiStarter.sol";
+import {PriceOracle} from "contracts/PriceOracle.sol";
 
 contract BonsaiStarterTest is BonsaiTest {
     function setUp() public withRelay {}
@@ -27,44 +27,57 @@ contract BonsaiStarterTest is BonsaiTest {
     function testOffChainMock() public {
         bytes32 imageId = queryImageId("FIBONACCI");
         // Deploy a new starter instance
-        BonsaiStarter starter = new BonsaiStarter(
+        PriceOracle starter = new PriceOracle(
             IBonsaiRelay(bonsaiRelay),
             imageId
         );
 
         // Anticipate a callback invocation on the starter contract
-        vm.expectCall(address(starter), abi.encodeWithSelector(BonsaiStarter.storeResult.selector));
+        vm.expectCall(
+            address(starter),
+            abi.encodeWithSelector(PriceOracle.storeResult.selector)
+        );
         // Relay the solution as a callback
         uint64 BONSAI_CALLBACK_GAS_LIMIT = 100000;
         runCallbackRequest(
-            imageId, abi.encode(128), address(starter), starter.storeResult.selector, BONSAI_CALLBACK_GAS_LIMIT
+            imageId,
+            "",
+            address(starter),
+            starter.storeResult.selector,
+            BONSAI_CALLBACK_GAS_LIMIT
         );
 
         // Validate the Fibonacci solution value
-        uint256 result = starter.fibonacci(128);
-        assertEq(result, uint256(407305795904080553832073954));
+        uint256 result = starter.price();
+        assertFalse(result == 0);
     }
 
     // Test the BonsaiStarter contract by mocking an on-chain callback request
     function testOnChainMock() public {
         // Deploy a new starter instance
-        BonsaiStarter starter = new BonsaiStarter(
+        PriceOracle starter = new PriceOracle(
             IBonsaiRelay(bonsaiRelay),
             queryImageId("FIBONACCI")
         );
 
         // Anticipate an on-chain callback request to the relay
-        vm.expectCall(address(bonsaiRelay), abi.encodeWithSelector(IBonsaiRelay.requestCallback.selector));
+        vm.expectCall(
+            address(bonsaiRelay),
+            abi.encodeWithSelector(IBonsaiRelay.requestCallback.selector)
+        );
         // Request the on-chain callback
-        starter.calculateFibonacci(128);
+        starter.requestPrice();
 
         // Anticipate a callback invocation on the starter contract
-        vm.expectCall(address(starter), abi.encodeWithSelector(BonsaiStarter.storeResult.selector));
+        vm.expectCall(
+            address(starter),
+            abi.encodeWithSelector(PriceOracle.storeResult.selector)
+        );
         // Relay the solution as a callback
         runPendingCallbackRequest();
 
         // Validate the Fibonacci solution value
-        uint256 result = starter.fibonacci(128);
-        assertEq(result, uint256(407305795904080553832073954));
+        uint256 result = starter.price();
+        assertFalse(result == 0);
     }
 }

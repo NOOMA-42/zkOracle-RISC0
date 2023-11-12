@@ -8,7 +8,7 @@ import {IBonsaiRelay} from "bonsai/IBonsaiRelay.sol";
 import {BonsaiCheats} from "bonsai/BonsaiCheats.sol";
 
 import {BonsaiDeploy} from "./BonsaiDeploy.sol";
-import {BonsaiStarter} from "../contracts/BonsaiStarter.sol";
+import {PriceOracle} from "../contracts/PriceOracle.sol";
 
 /// @notice Deployment script for the BonsaiStarter project.
 /// @dev Use the following environment variables to control the deployment:
@@ -36,7 +36,7 @@ contract Deploy is Script, BonsaiCheats, BonsaiDeploy {
         // TEMPLATE: Modify this block to match your expected deployment.
         bytes32 imageId = queryImageId("FIBONACCI");
         console2.log("Image ID for FIBONACCI is ", vm.toString(imageId));
-        BonsaiStarter app = new BonsaiStarter(bonsaiRelay, imageId);
+        PriceOracle app = new PriceOracle(bonsaiRelay, imageId);
         console2.log("Deployed BonsaiStarter to ", address(app));
 
         vm.stopBroadcast();
