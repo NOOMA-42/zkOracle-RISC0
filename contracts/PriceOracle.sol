@@ -24,7 +24,6 @@ import {BonsaiCallbackReceiver} from "bonsai/BonsaiCallbackReceiver.sol";
 //       or difficult to implement function to a RISC Zero guest running on Bonsai.
 contract PriceOracle is BonsaiCallbackReceiver {
     uint256 public price;
-    uint256 public time;
 
     /// @notice Image ID of the only zkVM binary to accept callbacks from.
     bytes32 public immutable imageId;
@@ -44,12 +43,8 @@ contract PriceOracle is BonsaiCallbackReceiver {
     event CalculateFibonacciCallback(uint256 indexed n, uint256 result);
 
     /// @notice Callback function logic for processing verified journals from Bonsai.
-    function storeResult(
-        uint256 _price,
-        uint256 _time
-    ) external onlyBonsaiCallback(imageId) {
+    function storeResult(uint256 _price) external onlyBonsaiCallback(imageId) {
         price = _price;
-        time = _time;
     }
 
     /// @notice Sends a request to Bonsai to have have the nth Fibonacci number calculated.
