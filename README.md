@@ -1,4 +1,12 @@
-# Bonsai Foundry Template
+# zkOracle - A zkHack Istanbul Project
+
+```=shell
+cd simple-proxy
+yarn start
+
+#to another terminal
+cargo run
+```
 
 > **Note: This software is not production ready. Do not use in production.**
 
